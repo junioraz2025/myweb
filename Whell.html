@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wheel of Fortune - Qrup ilə</title>
+<style>
+:root{
+  --main-color:#1f3f70;
+  --main-dark:#152d50;
+}
+body { 
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  margin:0; 
+  padding:50px 0; 
+  background:#e3edf6;
+  text-align:center; 
+  color:#333;
+}
+
+h1 { 
+  color:var(--main-color); 
+  margin-bottom:25px; 
+  font-size:36px; 
+  text-shadow:1px 1px 3px rgba(0,0,0,0.2); 
+}
+
+.wheel-container { 
+  background:#fff; 
+  padding:30px; 
+  border-radius:20px; 
+  box-shadow:0 6px 20px rgba(0,0,0,0.25); 
+  display:inline-block; 
+}
+
+canvas { 
+  display:block; 
+  margin:auto; 
+  border-radius:50%; 
+}
+
+button { 
+  font-size:18px; 
+  padding:12px 22px; 
+  color:#fff; 
+  border:none; 
+  cursor:pointer; 
+  border-radius:10px; 
+  margin-top:15px; 
+  transition:0.3s; 
+}
+
+#spinButton { background-color: var(--main-color); }
+#spinButton:hover { background-color: var(--main-dark); }
+
+#saveScoreButton { background-color: var(--main-color); }
+#saveScoreButton:hover { background-color: var(--main-dark); }
+
+.result-box { 
+  margin-top:25px; 
+  padding:25px; 
+  background:#fff; 
+  border-radius:20px; 
+  box-shadow:0 6px 20px rgba(0,0,0,0.25); 
+  max-width:500px; 
+  margin-left:auto; 
+  margin-right:auto; 
+  font-size:18px; 
+  display:none; 
+  text-align:center;
+  width:500px;
+}
+
+.score-input { 
+  width:70px; 
+  padding:8px; 
+  border:1px solid #ccc; 
+  border-radius:8px; 
+  margin-right:12px; 
+  font-size:16px; 
+}
+
+#groupSelect { 
+  font-size:16px; 
+  padding:8px 12px; 
+  border-radius:8px; 
+  margin-bottom:20px; 
+  border:1px solid var(--main-color); 
+  display:block; 
+  margin-left:auto; 
+  margin-right:auto; 
+}
+</style>
+</head>
+<body>
+
+<h1>Wheel of Fortune - Qrup ilə</h1>
+
+<select id="groupSelect">
+  <option value="">Qrup seçin</option>
+</select>
+
+<div class="wheel-container">
+  <canvas id="wheelCanvas" width="500" height="500"></canvas>
+  <button id="spinButton">Spin the Wheel</button>
+</div>
+
+<div class="result-box" id="resultBox">
+  <h2 id="winnerName"></h2>
+  <p id="winnerQuestion"></p>
+  <div id="scoreSection" style="margin-top:15px;">
+    <input type="number" id="scoreInput" class="score-input" min="0" max="10" placeholder="0-10"/>
+    <button id="saveScoreButton">Təsdiqlə</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const spinButton = document.getElementById('spinButton');
+const resultBox = document.getElementById('resultBox');
+const winnerName = document.getElementById('winnerName');
+const winnerQuestion = document.getElementById('winnerQuestion');
+const scoreInput = document.getElementById('scoreInput');
+const saveScoreButton = document.getElementById('saveScoreButton');
+const groupSelect = document.getElementById('groupSelect');
+
+let groups = JSON.parse(localStorage.getItem("groups")) || {};
+let groupQuestions = JSON.parse(localStorage.getItem("groupQuestions")) || {};
+let currentGroup = '';
+let names = [];
+let isSpinning = false;
+let currentAngle = 0;
+let spinAngle = 0;
+let currentSelected = null;
+
+function loadGroups() {
+  groupSelect.innerHTML = '<option value="">Qrup seçin</option>';
+  Object.keys(groups).forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g; opt.textContent = g;
+    groupSelect.appendChild(opt);
+  });
+}
+loadGroups();
+
+groupSelect.addEventListener('change', () => {
+  currentGroup = groupSelect.value;
+  if(currentGroup) {
+    names = groups[currentGroup] || [];
+    drawWheel();
+  }
+});
+
+function drawWheel() {
+  const numSegments = names.length;
+  if(numSegments === 0) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
+  const segmentAngle = (2*Math.PI)/numSegments;
+  const colors = ["#FF5733","#33FF57","#3357FF","#F3FF33","#FF33A1","#33FFF3"];
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<numSegments;i++){
+    const startAngle = currentAngle + i*segmentAngle;
+    const endAngle = startAngle + segmentAngle;
+    ctx.beginPath();
+    ctx.moveTo(canvas.width/2, canvas.height/2);
+    ctx.arc(canvas.width/2, canvas.height/2, canvas.width/2, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(canvas.width/2, canvas.height/2);
+    ctx.rotate(startAngle + segmentAngle/2);
+    ctx.fillStyle="#000";
+    ctx.font="16px Arial";
+    ctx.fillText(names[i], canvas.width/4,0);
+    ctx.restore();
+  }
+  drawArrow();
+}
+
+function drawArrow() {
+  const arrowSize = 25;
+  const centerX = canvas.width/2;
+  const centerY = canvas.height/2;
+  ctx.fillStyle="#FF0000";
+  ctx.beginPath();
+  ctx.moveTo(centerX-arrowSize, centerY-(canvas.width/2)-15);
+  ctx.lineTo(centerX+arrowSize, centerY-(canvas.width/2)-15);
+  ctx.lineTo(centerX, centerY-(canvas.width/2)-50);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function spinWheel() {
+  if(!currentGroup || isSpinning || names.length===0) return;
+  isSpinning = true;
+  spinAngle = Math.random()*2000 + 2000;
+  const spinInterval = setInterval(() => {
+    currentAngle += (spinAngle/100);
+    drawWheel();
+    spinAngle -= 50;
+    if(spinAngle <=0) {
+      clearInterval(spinInterval);
+      determineWinner();
+    }
+  },50);
+}
+
+function determineWinner() {
+  if(names.length===0) return;
+  const numSegments = names.length;
+  const segmentAngle = (2*Math.PI)/numSegments;
+  const normalizedAngle = (currentAngle%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+  const winningSegmentIndex = Math.floor((numSegments - normalizedAngle/segmentAngle) % numSegments);
+
+  const selectedName = names[winningSegmentIndex];
+
+  let questions = groupQuestions[currentGroup] || [];
+  let selectedQuestion = "No questions available.";
+  if(questions.length>0) {
+    const qIndex = Math.floor(Math.random()*questions.length);
+    selectedQuestion = questions[qIndex];
+    questions.splice(qIndex,1);
+    groupQuestions[currentGroup] = questions;
+    localStorage.setItem("groupQuestions", JSON.stringify(groupQuestions));
+  }
+
+  currentSelected = { person: selectedName, question: selectedQuestion, group: currentGroup, time: new Date().toLocaleString() };
+  winnerName.textContent = `${selectedName}`; // sadəcə ad
+  winnerQuestion.textContent = `${selectedQuestion}`;
+  resultBox.style.display="block";
+  scoreInput.value="";
+
+  names.splice(winningSegmentIndex,1);
+  groups[currentGroup] = names;
+  localStorage.setItem("groups", JSON.stringify(groups));
+
+  currentAngle=0;
+  isSpinning=false;
+  drawWheel();
+}
+
+saveScoreButton.addEventListener('click', () => {
+  if(!currentSelected) return;
+  const score = parseFloat(scoreInput.value);
+  if(isNaN(score) || score<0 || score>10) { alert("0 ilə 10 arasında bal daxil edin!"); return; }
+
+  let results = JSON.parse(localStorage.getItem('results'))||[];
+  results.push(currentSelected);
+  results[results.length-1].score = score;
+  localStorage.setItem('results', JSON.stringify(results));
+
+  alert("Bal yadda saxlanıldı!");
+  resultBox.style.display="none";
+  currentSelected=null;
+  drawWheel();
+});
+
+drawWheel();
+spinButton.addEventListener('click', spinWheel);
+
+window.addEventListener('storage', (e)=>{
+  if(e.key==='groups'){
+    groups = JSON.parse(e.newValue)||{};
+    loadGroups();
+    if(currentGroup) names = groups[currentGroup] || [];
+    drawWheel();
+  }
+});
+</script>
+</body>
+</html>

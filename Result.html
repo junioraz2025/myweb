@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nəticələr - Qrup ilə</title>
+<style>
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin:0; padding:0; 
+    background: url('https://bbu.edu.az/uploads/images/universitet.jpg') no-repeat center center fixed; 
+    background-size: cover; 
+    color: #333;
+    position: relative;
+  }
+
+  body::before {
+    content:''; 
+    position:fixed; 
+    top:0; left:0; 
+    width:100%; height:100%; 
+    background: rgba(0,0,0,0.35); 
+    z-index:0;
+  }
+
+  header { 
+    background: rgba(20, 40, 75, 0.85); 
+    color:white; 
+    padding:60px 20px; 
+    text-align:center; 
+    position: relative; 
+    z-index:1; 
+    border-bottom-left-radius: 30px; 
+    border-bottom-right-radius: 30px; 
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3); 
+    overflow: hidden;
+  }
+  header h1 { 
+    margin:0; font-size:3em; 
+    animation: floatText 3s ease-in-out infinite alternate; 
+    letter-spacing:2px;
+  }
+  @keyframes floatText {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-8px); }
+  }
+  header p { font-size:1.2em; margin-top:10px; opacity:0.9; }
+
+  .container { max-width:980px; margin:28px auto; padding:0 16px 40px; position: relative; z-index:1; }
+
+  .actions-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:20px;}
+  .actions-top span.date-display{background:rgba(255,255,255,0.3);padding:6px 12px;border-radius:8px;font-size:14px;}
+  .actions-top button{appearance:none;border:none;cursor:pointer;background:linear-gradient(145deg, #a3c4f3, #d9e2f0);color:#1f1f1f;padding:8px 14px;border-radius:12px;font-weight:600;transition:0.3s;}
+  .actions-top button:hover{background:linear-gradient(145deg, #81a9e0, #c2d1e8);}
+  .teacher-name{font-weight:600;color:white;font-size:15px;}
+
+  .group-list{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+  .group-item{padding:8px 14px;background:#fff;border-radius:12px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.1);transition:0.3s;}
+  .group-item:hover{transform:scale(1.05);background:linear-gradient(145deg, #a3c4f3, #d9e2f0);color:#1f1f1f;}
+
+  .person-card{background: rgba(255,255,255,0.95); border-radius:14px; box-shadow:0 8px 18px rgba(0,0,0,.08); margin-bottom:14px; overflow:hidden; transition:transform .2s ease, box-shadow .2s ease;}
+  .person-card:hover{transform:translateY(-2px); box-shadow:0 10px 22px rgba(0,0,0,.12);}
+  .person-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(145deg, #a3c4f3, #d9e2f0);color:#1f1f1f;padding:14px 16px;border-radius:12px 12px 0 0;}
+  .person-name{font-weight:700;letter-spacing:.2px;}
+  .count-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:999px;font-size:12px;}
+  .entries{list-style:none;margin:0;padding:0;}
+  .entry{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-top:1px solid #eee;animation:fadeIn .35s ease both;}
+  .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(145deg, #a3c4f3, #d9e2f0);margin-top:6px;flex:0 0 10px;}
+  .entry-main{flex:1}
+  .question{margin:0;font-size:15px;line-height:1.5;color:#222}
+  .score{flex:0 0 auto;background:#e8f1ff;color:#0b4fb5;border:1px solid #cdddff;padding:6px 10px;border-radius:10px;font-weight:700;min-width:46px;text-align:center;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+  .empty{background: rgba(255,255,255,0.95); border-radius:14px; padding:26px; text-align:center; box-shadow:0 6px 16px rgba(0,0,0,.06);}
+  .empty h3{margin:6px 0 4px;}
+  .empty p{margin:0;color:#666;}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Nəticələr</h1>
+<p>Qruplara görə nəticələr</p>
+</header>
+
+<div class="container">
+  <div class="actions-top">
+    <div class="teacher-name" id="teacherNameDisplay"></div>
+    <div>
+      <span class="date-display" id="currentDate"></span>
+      <button id="exportPDF">📄 PDF kimi saxla</button>
+    </div>
+  </div>
+
+  <div class="group-list" id="groupList"></div>
+  <div id="resultsRoot"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+const resultsRoot = document.getElementById('resultsRoot');
+const groupList = document.getElementById('groupList');
+const currentDateElem = document.getElementById('currentDate');
+const teacherNameDisplay = document.getElementById('teacherNameDisplay');
+
+const today = new Date();
+const formattedDate = today.toISOString().split('T')[0];
+currentDateElem.textContent = formattedDate;
+
+const teacherName = localStorage.getItem("currentTeacher") || "Müəllim adı (qeyd olunmayıb)";
+teacherNameDisplay.textContent = `👩‍🏫 ${teacherName}`;
+
+let allResults = JSON.parse(localStorage.getItem('results')) || [];
+let groups = JSON.parse(localStorage.getItem('groups')) || {};
+
+function renderGroups() {
+  groupList.innerHTML='';
+  Object.keys(groups).forEach(g=>{
+    const div=document.createElement('div');
+    div.className='group-item';
+    div.textContent=g;
+    div.addEventListener('click', ()=> renderResults(g));
+    groupList.appendChild(div);
+  });
+}
+renderGroups();
+
+let currentGroup='';
+function escapeHtml(str){ return String(str).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;"); }
+
+function renderResults(group){
+  currentGroup=group;
+  resultsRoot.innerHTML='';
+  const results = allResults.filter(r=>r.group===group);
+  if(!results.length){
+    resultsRoot.innerHTML=`<div class="empty"><h3>Hələ nəticə yoxdur</h3><p>Seçilmiş qrup üçün nəticə yoxdur.</p></div>`;
+    return;
+  }
+  const byPerson = results.reduce((acc,r)=>{
+    if(!r||!r.person) return acc;
+    acc[r.person] = acc[r.person] || [];
+    acc[r.person].push(r);
+    return acc;
+  },{});
+
+  const people = Object.keys(byPerson).sort((a,b)=>{
+    const maxA = Math.max(...byPerson[a].map(x=>Number(x.score)));
+    const maxB = Math.max(...byPerson[b].map(x=>Number(x.score)));
+    return maxB-maxA;
+  });
+
+  const frag = document.createDocumentFragment();
+  people.forEach(person=>{
+    const card = document.createElement('div'); card.className='person-card';
+    card.innerHTML = `<div class="person-header"><div class="person-name">${escapeHtml(person)}</div><div class="count-badge">${byPerson[person].length} qeyd</div></div><ul class="entries"></ul>`;
+    const list = card.querySelector('.entries');
+    byPerson[person].forEach(item=>{
+      const li = document.createElement('li'); li.className='entry';
+      li.innerHTML = `<span class="dot"></span><div class="entry-main"><p class="question">${escapeHtml(item.question||'')}</p></div><div class="score">${Number(item.score).toFixed(1)}</div>`;
+      list.appendChild(li);
+    });
+    frag.appendChild(card);
+  });
+  resultsRoot.appendChild(frag);
+}
+
+document.getElementById('exportPDF').addEventListener('click',()=>{
+  if(!currentGroup){ alert("Əvvəl qrup seçin!"); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p','mm','a4');
+  
+  doc.setFontSize(14);
+  doc.text(`Qrup: ${currentGroup}`, 14, 18);
+  doc.text(`Müəllim: ${teacherName}`, 14, 26);
+  doc.text(`Tarix: ${formattedDate}`, 160, 18);
+
+  const groupResults = allResults.filter(r=>r.group===currentGroup);
+
+  const tableData = groupResults.map(item=>[
+    item.person,
+    item.question,
+    Number(item.score).toFixed(1)
+  ]);
+
+  doc.autoTable({
+    startY: 34,
+    head: [['Tələbə', 'Sual', 'Bal']],
+    body: tableData,
+    styles: { fontSize: 10, cellPadding: 4 },
+    headStyles: { fillColor: [163, 196, 243], textColor: 0 },
+    alternateRowStyles: { fillColor: [240, 245, 255] }
+  });
+
+  doc.save(`Neticeler_${currentGroup}_${formattedDate}.pdf`);
+});
+
+window.addEventListener('storage', (e)=>{
+  if(e.key==='groups'){
+    groups = JSON.parse(e.newValue)||{};
+    renderGroups();
+  }
+  if(e.key==='results'){
+    allResults = JSON.parse(e.newValue)||[];
+    if(currentGroup) renderResults(currentGroup);
+  }
+});
+</script>
+</body>
+</html>

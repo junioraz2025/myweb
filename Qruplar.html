@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adamlar Siyahısı - Qruplu</title>
+<style>
+body { 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  margin:0; padding:0; 
+  background: url('https://bbu.edu.az/uploads/images/universitet.jpg') no-repeat center center fixed; 
+  background-size: cover; 
+  color: #1f1f1f;
+  position: relative;
+}
+
+body::before {
+  content:''; position:fixed; top:0; left:0;
+  width:100%; height:100%;
+  background: rgba(0,0,0,0.35);
+  z-index:0;
+}
+
+header { 
+  background: rgba(20, 40, 75, 0.85); 
+  color:white; padding:50px 20px 40px 20px; text-align:center; 
+  position: relative; z-index:1; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; 
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3); overflow: hidden;
+}
+header h1 { margin:0; font-size:2.8em; animation: floatText 3s ease-in-out infinite alternate; letter-spacing: 2px; }
+@keyframes floatText { 0% { transform: translateY(0px); } 100% { transform: translateY(-8px); } }
+header p { font-size: 1.2em; margin-top: 10px; opacity:0.9; }
+
+.container { max-width: 900px; margin: 0 auto; padding: 0 20px 50px 20px; z-index:1; position:relative; }
+
+#groupContainer { display:flex; justify-content:center; gap:10px; margin-bottom:30px; flex-wrap:wrap; }
+#groupSelect, #newGroupInput { padding:12px 15px; font-size:16px; border-radius:12px; border:1px solid #81a9e0; background: #d9e2f0; color:#1f1f1f; }
+#groupSelect { min-width:150px; }
+#addGroupButton { background: #81a9e0; color:white; border:none; padding:12px 20px; font-size:16px; border-radius:12px; cursor:pointer; transition:0.3s; }
+#addGroupButton:hover { background:#5f8ac4; transform: scale(1.05); }
+
+#inputContainer { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+#nameInput { padding: 12px 15px; font-size: 16px; border-radius: 12px; border: 1px solid #81a9e0; width: 250px; transition: 0.3s; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background:#e6efff; color:#1f1f1f; }
+#nameInput:focus { border-color: #5f8ac4; outline:none; }
+#addNameButton { background: #81a9e0; color: white; border:none; padding:12px 20px; font-size:16px; border-radius:12px; cursor:pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+#addNameButton:hover { background: #5f8ac4; transform: scale(1.05); }
+
+.table-container { background:white; padding:20px; border-radius:20px; box-shadow:0 6px 15px rgba(0,0,0,0.15); overflow-x:auto; }
+table { width:100%; border-collapse: collapse; }
+th, td { padding:12px; text-align:left; border-bottom:1px solid #ddd; }
+th { background: #81a9e0; color:white; font-size:16px; }
+tr:hover { background: rgba(129,169,224,0.2); }
+td.action-cell { text-align: right; width: 50px; position: relative; }
+td.action-cell .remove-button { display: none; background-color: #FF3333; color:white; padding:4px 10px; border-radius:6px; font-size:14px; border:none; cursor:pointer; transition: 0.3s; }
+tr:hover td.action-cell .remove-button { display: inline-block; }
+td.action-cell .remove-button:hover { transform: scale(1.1); }
+
+footer { background: rgba(129,169,224,0.15); text-align:center; margin:0; padding:20px 0; color:#1f1f1f; font-size:14px; border-top: 1px solid #5f8ac4; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Tələbələr! - Qruplu</h1>
+  <p>Qrup yaradın və tələbələri əlavə edin</p>
+</header>
+
+<div class="container">
+
+  <div id="groupContainer">
+    <select id="groupSelect"><option value="">-- Qrup seçin --</option></select>
+    <input type="text" id="newGroupInput" placeholder="Yeni qrup adı">
+    <button id="addGroupButton">Qrup yarat</button>
+  </div>
+
+  <div id="inputContainer">
+    <input type="text" id="nameInput" placeholder="Yeni adamın adını daxil edin">
+    <button id="addNameButton">Əlavə et</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead><tr><th>Ad</th><th></th></tr></thead>
+      <tbody id="nameListContainer"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const groupSelect = document.getElementById('groupSelect');
+const newGroupInput = document.getElementById('newGroupInput');
+const addGroupButton = document.getElementById('addGroupButton');
+const nameInput = document.getElementById('nameInput');
+const addNameButton = document.getElementById('addNameButton');
+const nameListContainer = document.getElementById('nameListContainer');
+
+let groups = JSON.parse(localStorage.getItem("groups")) || {};
+let currentGroup = groupSelect.value;
+let names = [];
+
+function populateGroups() {
+  groupSelect.innerHTML = '<option value="">-- Qrup seçin --</option>';
+  for (let group in groups) {
+    let option = document.createElement('option');
+    option.value = group;
+    option.textContent = group;
+    groupSelect.appendChild(option);
+  }
+}
+populateGroups();
+
+groupSelect.addEventListener('change', () => {
+  currentGroup = groupSelect.value;
+  names = groups[currentGroup] || [];
+  updateNameList();
+});
+
+addGroupButton.addEventListener('click', () => {
+  const groupName = newGroupInput.value.trim();
+  if (!groupName) { alert("Qrup adı daxil edin!"); return; }
+  if (groups[groupName]) { alert("Bu qrup artıq mövcuddur!"); return; }
+  groups[groupName] = [];
+  localStorage.setItem('groups', JSON.stringify(groups));
+  populateGroups();
+  groupSelect.value = groupName;
+  currentGroup = groupName;
+  names = [];
+  updateNameList();
+  newGroupInput.value = '';
+});
+
+function updateNameList() {
+  nameListContainer.innerHTML = '';
+  names.forEach((name, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td class="name-cell">${name}</td>
+                     <td class="action-cell"><button class="remove-button" onclick="removeName(${index})">Sil</button></td>`;
+    nameListContainer.appendChild(row);
+  });
+  if (currentGroup) groups[currentGroup] = names;
+  localStorage.setItem("groups", JSON.stringify(groups));
+}
+
+function addName() {
+  if (!currentGroup) { alert("Əvvəl qrup seçin!"); return; }
+  const newName = nameInput.value.trim();
+  if (!newName) { alert("Ad daxil edin!"); return; }
+  names.push(newName);
+  nameInput.value = '';
+  updateNameList();
+}
+
+function removeName(index) {
+  names.splice(index,1);
+  updateNameList();
+}
+
+addNameButton.addEventListener('click', addName);
+nameInput.addEventListener('keyup', (e) => { if(e.key==='Enter') addName(); });
+</script>
+
+</body>
+</html>

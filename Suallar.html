@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Suallar Səhifəsi - Qruplu</title>
+<style>
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin:0; padding:0; 
+    background: url('https://bbu.edu.az/uploads/images/universitet.jpg') no-repeat center center fixed; 
+    background-size: cover; 
+    color: #333;
+    position: relative;
+  }
+
+  body::before {
+    content:''; 
+    position:fixed; 
+    top:0; left:0; 
+    width:100%; height:100%; 
+    background: rgba(0,0,0,0.35); 
+    z-index:0;
+  }
+
+  header { 
+    background: rgba(20, 40, 75, 0.85); 
+    color:white; 
+    padding:60px 20px; 
+    text-align:center; 
+    position: relative; 
+    z-index:1; 
+    border-bottom-left-radius: 30px; 
+    border-bottom-right-radius: 30px; 
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3); 
+    overflow: hidden;
+  }
+
+  header h1 { 
+    margin:0; 
+    font-size:3em; 
+    animation: floatText 3s ease-in-out infinite alternate; 
+    letter-spacing:2px;
+  }
+  @keyframes floatText {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-8px); }
+  }
+
+  header p { font-size:1.2em; margin-top:10px; opacity:0.9; }
+
+  .container { max-width:900px; margin:50px auto; padding:20px; position: relative; z-index:1; }
+
+  #groupContainer { display:flex; justify-content:center; gap:10px; margin-bottom:30px; flex-wrap:wrap; }
+  #groupSelect { padding:12px 15px; font-size:16px; border-radius:12px; border:1px solid #1f1f1f; min-width:200px; }
+
+  #inputContainer { display:flex; justify-content:center; gap:10px; margin-bottom:30px; flex-wrap: wrap; }
+  #questionInput { padding:12px 15px; font-size:16px; border-radius:12px; border:1px solid #1f1f1f; width:300px; transition:0.3s; }
+  #questionInput:focus { border-color:#1a2e4f; outline:none; }
+  #addQuestionButton { background: linear-gradient(145deg, #a3c4f3, #d9e2f0); color:#1f1f1f; border:none; padding:12px 20px; font-size:16px; border-radius:15px; cursor:pointer; transition:0.3s, transform 0.3s; }
+  #addQuestionButton:hover { transform: scale(1.05); background: linear-gradient(145deg, #81a9e0, #c2d1e8); }
+
+  .table-container { background: rgba(255,255,255,0.95); padding:20px; border-radius:20px; box-shadow:0 6px 15px rgba(0,0,0,0.2); overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { padding:12px; text-align:left; border-bottom:1px solid #ddd; }
+  th { background: linear-gradient(145deg, #a3c4f3, #d9e2f0); color:#1f1f1f; font-size:16px; }
+  tr:hover { background: rgba(131, 169, 224,0.2); }
+  td.action-cell { text-align:right; width:50px; }
+  .remove-button { background-color: #FF3333; color:white; padding:5px 10px; border-radius:8px; font-size:14px; border:none; cursor:pointer; transition:0.3s; }
+  .remove-button:hover { transform:scale(1.1); }
+
+  footer { text-align:center; margin:50px 0; color:#1a2e4f; font-size:14px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Suallar - Qruplu</h1>
+  <p>Qrup seçin və sualları əlavə edin</p>
+</header>
+
+<div class="container">
+  <div id="groupContainer">
+    <select id="groupSelect"><option value="">-- Qrup seçin --</option></select>
+  </div>
+
+  <div id="inputContainer">
+    <input type="text" id="questionInput" placeholder="Yeni sual daxil edin">
+    <button id="addQuestionButton">Əlavə et</button>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Suallar</th><th></th></tr>
+      </thead>
+      <tbody id="questionListContainer"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const groupSelect = document.getElementById('groupSelect');
+const questionInput = document.getElementById('questionInput');
+const addQuestionButton = document.getElementById('addQuestionButton');
+const questionListContainer = document.getElementById('questionListContainer');
+
+let groups = JSON.parse(localStorage.getItem("groups")) || {};
+let groupQuestions = JSON.parse(localStorage.getItem("groupQuestions")) || {};
+let currentGroup = groupSelect.value;
+let questions = [];
+
+function populateGroups() {
+  groupSelect.innerHTML = '<option value="">-- Qrup seçin --</option>';
+  for (let group in groups) {
+    let option = document.createElement('option');
+    option.value = group;
+    option.textContent = group;
+    groupSelect.appendChild(option);
+  }
+}
+populateGroups();
+
+groupSelect.addEventListener('change', () => {
+  currentGroup = groupSelect.value;
+  questions = groupQuestions[currentGroup] || [];
+  updateQuestionList();
+});
+
+function updateQuestionList() {
+  questionListContainer.innerHTML = '';
+  questions.forEach((q,index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${index+1}</td>
+                     <td>${q}</td>
+                     <td class="action-cell"><button class="remove-button" onclick="removeQuestion(${index})">Sil</button></td>`;
+    questionListContainer.appendChild(row);
+  });
+  if (currentGroup) groupQuestions[currentGroup] = questions;
+  localStorage.setItem('groupQuestions', JSON.stringify(groupQuestions));
+}
+
+function addQuestion() {
+  if (!currentGroup) { alert("Əvvəl qrup seçin!"); return; }
+  const newQ = questionInput.value.trim();
+  if (!newQ) { alert("Düzgün sual daxil edin!"); return; }
+  questions.push(newQ);
+  questionInput.value = '';
+  updateQuestionList();
+}
+
+function removeQuestion(index) {
+  questions.splice(index,1);
+  updateQuestionList();
+}
+
+addQuestionButton.addEventListener('click', addQuestion);
+questionInput.addEventListener('keyup', (e) => { if(e.key==='Enter') addQuestion(); });
+</script>
+
+</body>
+</html>

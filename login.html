@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBUSpin - Giriş</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f2f5f8;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .login-container {
+    background: #fff;
+    padding: 40px 35px 45px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    width: 330px;
+    box-sizing: border-box;
+    text-align: center;
+    position: relative;
+  }
+
+  .logo-box {
+    width: 90px;
+    height: 90px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    position: relative;
+    top: -10px;
+  }
+
+  .logo {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #f2f5f8;
+  }
+
+  .login-container h1 {
+    color: #1f3f70;
+    font-size: 21px;
+    margin-bottom: 25px;
+    font-weight: 600;
+  }
+
+  .input-group {
+    position: relative;
+    margin-bottom: 16px;
+    width: 100%;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 12px 42px 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.3s;
+  }
+
+  .input-group input:focus {
+    border-color: #1f3f70;
+    box-shadow: 0 0 4px rgba(31,63,112,0.25);
+  }
+
+  .error input {
+    border-color: #e63946 !important;
+    box-shadow: 0 0 6px rgba(230,57,70,0.3) !important;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+
+  .shake {
+    animation: shake 0.4s ease;
+  }
+
+  .toggle-eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    opacity: 0.65;
+    transition: 0.3s;
+  }
+
+  .toggle-eye:hover {
+    opacity: 1;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #1f3f70;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 5px;
+  }
+
+  button:hover {
+    background: #142b4e;
+  }
+
+  .toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #1f3f70;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.4s, transform 0.4s;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 400px) {
+    .login-container {
+      width: 90%;
+      padding: 30px 25px 35px;
+    }
+    .logo-box {
+      width: 70px;
+      height: 70px;
+    }
+    .logo {
+      width: 55px;
+      height: 55px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+  <div class="login-container" id="loginContainer">
+
+    <div class="logo-box">
+      <img src="bbu.jpg" alt="BBUSpin Logo" class="logo">
+    </div>
+
+    <h1>BBUSpin Giriş</h1>
+
+    <div class="input-group" id="nameGroup">
+      <input type="text" id="teacherName" placeholder="Müəllim adı və Soyadı">
+    </div>
+
+    <div class="input-group" id="loginGroup">
+      <input type="text" id="login" placeholder="Login">
+    </div>
+
+    <div class="input-group" id="passGroup">
+      <input type="password" id="password" placeholder="Parol">
+      <svg class="toggle-eye" id="toggleEye" viewBox="0 0 24 24" fill="none">
+        <path d="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#555"/>
+      </svg>
+    </div>
+
+    <button id="loginBtn">Daxil ol</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    const loginContainer = document.getElementById('loginContainer');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    const allowedUsers = {
+      "Ashraf75": "12345678",
+      "Ashraf76": "abc456",
+      "teacher3": "xyz789"
+    };
+
+    const passwordInput = document.getElementById('password');
+    const toggleEye = document.getElementById('toggleEye');
+    let passVisible = false;
+
+    toggleEye.addEventListener('click', () => {
+      passVisible = !passVisible;
+      passwordInput.type = passVisible ? 'text' : 'password';
+      toggleEye.innerHTML = passVisible
+        ? '<path d="M12 4.5C7 4.5 2.73 8 1 12C2.73 16 7 19.5 12 19.5C17 19.5 21.27 16 23 12C21.27 8 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z" fill="#1f3f70"/>'
+        : '<path d="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#555"/>';
+    });
+
+    document.getElementById('loginBtn').onclick = () => {
+      const teacherName = document.getElementById('teacherName').value.trim();
+      const login = document.getElementById('login').value.trim();
+      const pass = document.getElementById('password').value.trim();
+
+      document.querySelectorAll('.input-group').forEach(g => g.classList.remove('error'));
+
+      if (!teacherName || !login || !pass) {
+        showToast('Bütün sahələri doldurun!');
+        document.querySelectorAll('.input-group').forEach(g => g.classList.add('error'));
+        loginContainer.classList.add('shake');
+        setTimeout(() => loginContainer.classList.remove('shake'), 500);
+        return;
+      }
+
+      if (allowedUsers[login] && allowedUsers[login] === pass) {
+        localStorage.setItem('currentTeacher', teacherName);
+        localStorage.setItem('currentTeacherLogin', login);
+
+        if (!localStorage.getItem(`groups_${login}`))
+          localStorage.setItem(`groups_${login}`, JSON.stringify({}));
+        if (!localStorage.getItem(`results_${login}`))
+          localStorage.setItem(`results_${login}`, JSON.stringify([]));
+
+        window.location.href = "Anasehife2025.html";
+      } else {
+        showToast('Login və ya parol səhvdir!');
+        document.getElementById('loginGroup').classList.add('error');
+        document.getElementById('passGroup').classList.add('error');
+        loginContainer.classList.add('shake');
+        setTimeout(() => loginContainer.classList.remove('shake'), 500);
+      }
+    };
+  </script>
+
+</body>
+</html>

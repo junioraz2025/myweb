@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oyun Platforması</title>
+<style>
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin:0; padding:0; 
+    background: url('https://bbu.edu.az/uploads/images/universitet.jpg') no-repeat center center fixed; 
+    background-size: cover; 
+    color: #333;
+    position: relative;
+  }
+
+  body::before {
+    content:'';
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.4);
+    z-index:0;
+  }
+
+  header { 
+    background: rgba(20, 40, 75, 0.85); 
+    color:white; 
+    padding:60px 20px; 
+    text-align:center; 
+    position: relative;
+    z-index:1;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 30px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+  header h1 { 
+    margin:0; 
+    font-size:3em; 
+    animation: floatText 3s ease-in-out infinite alternate;
+    letter-spacing: 2px;
+  }
+  @keyframes floatText {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-8px); }
+  }
+  header p { font-size:1.2em; margin-top:10px; opacity:0.9; }
+
+  .cards-container { 
+    display:flex; 
+    justify-content:center; 
+    flex-wrap:wrap; 
+    gap:30px; 
+    margin:60px; 
+    position: relative;
+    z-index:1;
+  }
+  .card { 
+    background: linear-gradient(145deg, #a3c4f3, #d9e2f0); 
+    border-radius:25px; 
+    width:280px; 
+    height:200px; 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    justify-content:center; 
+    text-align:center; 
+    transition: transform 0.4s, box-shadow 0.4s, background 0.4s; 
+    cursor:pointer; 
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+    position: relative;
+    overflow: hidden;
+    color:#1f1f1f;
+  }
+  .card:hover { 
+    transform: translateY(-12px) scale(1.07); 
+    box-shadow:0 15px 30px rgba(0,0,0,0.35); 
+    background: linear-gradient(145deg, #81a9e0, #c2d1e8);
+  }
+  .card h2 { margin:10px 0; font-size:1.6em; font-weight:700; }
+  .card p { font-size:15px; margin:0 12px; line-height:1.4; }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    width:250%;
+    height:250%;
+    background: rgba(255,255,255,0.08);
+    top:-75%;
+    left:-75%;
+    transform: rotate(45deg);
+    transition: transform 0.6s ease;
+  }
+  .card:hover::before { transform: rotate(135deg); }
+
+  footer { 
+    text-align:center; 
+    color:#1a2e4f; 
+    font-size:16px; 
+    font-weight:bold; 
+    margin:50px 0; 
+    position: relative;
+    z-index:1;
+  }
+
+  @media(max-width:900px){
+    .cards-container { flex-direction:column; align-items:center; margin:40px 20px; }
+    .card { width:90%; max-width:320px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SpinEdu</h1>
+  <p>Əyləncəli və təhsil yönümlü çarx oyununa xoş gəlmisiniz!</p>
+</header>
+
+<div class="cards-container">
+  <div class="card" onclick="location.href='Whell.html'">
+    <h2>🎡 Çarx Oyun</h2>
+    <p>Çarxı fırladın və təsadüfi adam seçin</p>
+  </div>
+  <div class="card" onclick="location.href='Qruplar.html'">
+    <h2>👥 Tələbələr</h2>
+    <p>Tələbələri əlavə edin, redaktə edin və idarə edin</p>
+  </div>
+  <div class="card" onclick="location.href='Suallar.html'">
+    <h2>❓ Suallar</h2>
+    <p>Sualları əlavə edin və oyun üçün hazır edin</p>
+  </div>
+  <div class="card" onclick="location.href='Result.html'">
+    <h2>🏆 Nəticələr</h2>
+    <p>Bütün oyunçuların sual və ballarını burada görün</p>
+  </div>
+</div>
+
+<script>
+const currentTeacher = localStorage.getItem('currentTeacher');
+if(!currentTeacher){
+  
+    window.location.href = "login.html";
+}
+
+const headerTeacher = document.querySelector('header p');
+if(headerTeacher) headerTeacher.textContent = `Müəllim: ${currentTeacher}`;
+
+const currentLogin = localStorage.getItem('currentTeacherLogin');
+let groups = JSON.parse(localStorage.getItem(`groups_${currentLogin}`)) || {};
+let allResults = JSON.parse(localStorage.getItem(`results_${currentLogin}`)) || [];
+</script>
+
+</body>
+</html>
