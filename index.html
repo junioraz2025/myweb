@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EduWheel</title>
 <style>
-  body {
+   body {
     font-family: 'Segoe UI', sans-serif;
     background: #f2f5f8;
     margin: 0;
@@ -14,42 +14,37 @@
     justify-content: center;
     align-items: center;
   }
-  .login-container {
+ .login-container {
     background: #fff;
     padding: 40px 35px 45px;
     border-radius: 16px;
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
     width: 330px;
-    box-sizing: border-box;
     text-align: center;
-    position: relative;
   }
-  .logo-box {
-    width: 110px;
-    height: 110px;
+   .logo-box {
+    width: 100px;
+    height: 100px;
     background: #ffffff;
     border-radius: 50%;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto 5px; /* ↓ boşluğu sıxdım */
-    position: relative;
-    top: -5px;
+    margin: 0 auto 10px;
+    overflow: hidden; /* LOGO HAMSININ DÜZGÜN GÖRÜNMƏSİ ÜÇÜN */
   }
-  .logo {
-    width: 90px;
-    height: 90px;
-    object-fit: cover;
-    border-radius: 50%;
-    border: 3px solid #e9edf2;
+   .logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* LOGO ARTIQ ÇƏRÇIVƏYƏ MÜKƏMMƏL OTURUR */
   }
   .login-container h1 {
     color: #1f3f70;
-    font-size: 23px;
-    margin-top: 0;   /* <-- boşluq yox */
-    margin-bottom: 25px;
-    font-weight: 700;
+    font-size: 20px;
+    margin-top: 5px;  /* LOGO İLƏ ARADAKI BOŞLUQ AZALDI */
+    margin-bottom: 20px;
+    font-weight: 600;
   }
   .input-group {
     position: relative;
@@ -230,4 +225,5 @@ document.getElementById('loginBtn').onclick = async () => {
 
 </body>
 </html>
+
 
