@@ -203,10 +203,9 @@
     }
 
     const allowedUsers = {
-      "Ashraf75": "12345678",
-      "Ashraf76": "abc456",
-      "teacher3": "xyz789",
-      "İlknur": "19982025"
+      "Ashraf75": "ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f",
+      "Teacher1": "b9366bc39c979e55134beed3212b5da5a2e9d0bf46816704fdbd52e8ecb3abe3",
+      "Teacher2": "79f98db2d0e30c38c9880805b30f0561d0eab6dfa8f1209df48e76d2164ccb3a"
     };
 
     const passwordInput = document.getElementById('password');
@@ -221,7 +220,14 @@
         : '<path d="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#555"/>';
     });
 
-    document.getElementById('loginBtn').onclick = () => {
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    document.getElementById('loginBtn').onclick = async () => {
       const teacherName = document.getElementById('teacherName').value.trim();
       const login = document.getElementById('login').value.trim();
       const pass = document.getElementById('password').value.trim();
@@ -236,7 +242,9 @@
         return;
       }
 
-      if (allowedUsers[login] && allowedUsers[login] === pass) {
+      const hashedInput = await sha256(pass);
+
+      if (allowedUsers[login] && allowedUsers[login] === hashedInput) {
         localStorage.setItem('currentTeacher', teacherName);
         localStorage.setItem('currentTeacherLogin', login);
 
@@ -258,4 +266,3 @@
 
 </body>
 </html>
-
