@@ -25,30 +25,31 @@
     position: relative;
   }
   .logo-box {
-    width: 90px;
-    height: 90px;
+    width: 110px;
+    height: 110px;
     background: #ffffff;
     border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.12);
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 5px; /* ↓ boşluğu sıxdım */
     position: relative;
-    top: -10px;
+    top: -5px;
   }
   .logo {
-    width: 70px;
-    height: 70px;
+    width: 90px;
+    height: 90px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid #f2f5f8;
+    border: 3px solid #e9edf2;
   }
   .login-container h1 {
     color: #1f3f70;
-    font-size: 21px;
+    font-size: 23px;
+    margin-top: 0;   /* <-- boşluq yox */
     margin-bottom: 25px;
-    font-weight: 600;
+    font-weight: 700;
   }
   .input-group {
     position: relative;
@@ -126,8 +127,8 @@
   }
   @media (max-width: 400px) {
     .login-container { width: 90%; padding: 30px 25px 35px; }
-    .logo-box { width: 70px; height: 70px; }
-    .logo { width: 55px; height: 55px; }
+    .logo-box { width: 90px; height: 90px; }
+    .logo { width: 70px; height: 70px; }
   }
 </style>
 </head>
@@ -171,11 +172,6 @@ const allowedUsers = {
   "Ilknur": "f491c858a536cf92ba759d9a8b58221614ec4f9671e2644e581d1d416a359c77" 
 };
 
-
-
-
-
-
 const passwordInput = document.getElementById('password');
 const toggleEye = document.getElementById('toggleEye');
 let passVisible = false;
@@ -187,7 +183,6 @@ toggleEye.addEventListener('click', () => {
     ? '<path d="M12 4.5C7 4.5 2.73 8 1 12C2.73 16 7 19.5 12 19.5C17 19.5 21.27 16 23 12C21.27 8 17 4.5 12 4.5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17Z" fill="#1f3f70"/>'
     : '<path d="M12 5C7 5 2.73 8.11 1 12C2.73 15.89 7 19 12 19C17 19 21.27 15.89 23 12C21.27 8.11 17 5 12 5ZM12 17C9.24 17 7 14.76 7 12C7 9.24 9.24 7 12 7C14.76 7 17 9.24 17 12C17 14.76 14.76 17 12 17ZM12 9C10.34 9 9 10.34 9 12C9 13.66 10.34 15 12 15C13.66 15 15 13.66 15 12C15 10.34 13.66 9 12 9Z" fill="#555"/>';
 });
-
 
 async function sha256(message) {
   const msgBuffer = new TextEncoder().encode(message);
@@ -235,13 +230,3 @@ document.getElementById('loginBtn').onclick = async () => {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
